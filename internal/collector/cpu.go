@@ -88,3 +88,16 @@ func CollectCPU() (float64, error) {
 
 	return cpuDelta(prev, curr), nil
 }
+type CPUCollector struct{}
+
+func (c CPUCollector) Name() string { return "cpu" }
+
+func (c CPUCollector) Collect() ([]Metric, error) {
+	usage, err := CollectCPU()
+	if err != nil {
+		return nil, err
+	}
+	return []Metric{
+		{Name: "cpu_percent", Value: usage, Unit: "%"},
+	}, nil
+}

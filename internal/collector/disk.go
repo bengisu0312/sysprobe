@@ -47,3 +47,18 @@ func (d Disk) UsedPercent() float64 {
 	}
 	return (float64(d.Used) / float64(denominator)) * 100.0
 }
+type DiskCollector struct {
+	Path string
+}
+
+func (c DiskCollector) Name() string { return "disk" }
+
+func (c DiskCollector) Collect() ([]Metric, error) {
+	disk, err := CollectDisk(c.Path)
+	if err != nil {
+		return nil, err
+	}
+	return []Metric{
+		{Name: "disk_percent", Value: disk.UsedPercent(), Unit: "%"},
+	}, nil
+}

@@ -66,3 +66,18 @@ func parseLoadavg(data []byte) (Load, error) {
 		CPUs:   runtime.NumCPU(),
 	}, nil
 }
+type LoadCollector struct{}
+
+func (c LoadCollector) Name() string { return "load" }
+
+func (c LoadCollector) Collect() ([]Metric, error) {
+	load, err := CollectLoad()
+	if err != nil {
+		return nil, err
+	}
+	return []Metric{
+		{Name: "load1", Value: load.Load1, Unit: ""},
+		{Name: "load5", Value: load.Load5, Unit: ""},
+		{Name: "load15", Value: load.Load15, Unit: ""},
+	}, nil
+}
