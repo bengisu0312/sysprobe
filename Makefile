@@ -4,9 +4,15 @@ build:
 	go build -o bin/$(BINARY) ./cmd/sysprobe
 
 run: build
-	./bin/$(BINARY) status
+	./bin/sysprobe status
 
 clean:
 	rm -rf bin/
 
-.PHONY: build run clean
+fmt:
+	gofmt -w .
+
+vet:
+	go vet ./...
+
+.PHONY: build run clean fmt vet
