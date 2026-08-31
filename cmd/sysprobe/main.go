@@ -22,48 +22,17 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 	switch subcommand {
 	case "status":
-		cpuUsage, err := collector.CollectCPU()
-		if err != nil {
-			fmt.Fprintf(stderr, "Error collecting CPU: %v\n", err)
-			return 1
-		}
-		fmt.Fprintf(stdout, "CPU:     %.1f%%\n", cpuUsage)
-
-		mem, err := collector.Collect()
-		if err != nil {
-			fmt.Fprintf(stderr, "Error collecting memory: %v\n", err)
-			return 1
-		}
-
-		totalGiB := float64(mem.Total) / (1024 * 1024 * 1024)
-		availGiB := float64(mem.Available) / (1024 * 1024 * 1024)
-		usedGiB := totalGiB - availGiB
-		fmt.Fprintf(stdout, "Memory:  %.1f%% (%.1f GiB / %.1f GiB)\n", mem.UsedPercent(), usedGiB, totalGiB)
-
-		if mem.SwapTotal == 0 {
-			fmt.Fprintln(stdout, "Swap:     0.0% (swap disabled)")
-		} else {
-			swapTotalGiB := float64(mem.SwapTotal) / (1024 * 1024 * 1024)
-			swapFreeGiB := float64(mem.SwapFree) / (1024 * 1024 * 1024)
-			swapUsedGiB := swapTotalGiB - swapFreeGiB
-			fmt.Fprintf(stdout, "Swap:     %.1f%% (%.1f GiB / %.1f GiB)\n", mem.SwapUsedPercent(), swapUsedGiB, swapTotalGiB)
-		}
-
-		disk, err := collector.CollectDisk("/")
-		if err != nil {
-			fmt.Fprintf(stderr, "Error collecting disk: %v\n", err)
-			return 1
-		}
-		diskTotalGiB := float64(disk.Total) / (1024 * 1024 * 1024)
-		diskUsedGiB := float64(disk.Used) / (1024 * 1024 * 1024)
-		fmt.Fprintf(stdout, "Disk /:  %.1f%% (%.1f GiB / %.1f GiB)\n", disk.UsedPercent(), diskUsedGiB, diskTotalGiB)
-
-		load, err := collector.CollectLoad()
-		if err != nil {
-			fmt.Fprintf(stderr, "Error collecting load: %v\n", err)
-			return 1
-		}
-		fmt.Fprintf(stdout, "Load:    %.2f / %.2f / %.2f  (%.2f per core, %d cpus)\n", load.Load1, load.Load5, load.Load15, load.PerCore(), load.CPUs)
+		for _, c := range collector.DefaultCollectors() {
+	metrics, err := c.Collect()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "collector %s failed: %v\n", c.Name(), err)
+		continue
+	}
+	for _, m := range metrics {
+		fmt.Printf("%-20s %8.1f %s\n", m.Name, m.Value, m.Unit)
+	}
+}
+		
 
 		return 0
 
@@ -80,4 +49,4 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 func printUsage(w io.Writer) {
 	fmt.Fprintln(w, "Usage: sysprobe <status|version>")
-
+}
