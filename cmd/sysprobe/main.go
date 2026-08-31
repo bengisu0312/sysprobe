@@ -22,6 +22,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 	switch subcommand {
 	case "status":
+		cpuUsage, err := collector.CollectCPU()
+		if err != nil {
+			fmt.Fprintf(stderr, "Error collecting CPU: %v\n", err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "CPU:     %.1f%%\n", cpuUsage)
+
 		mem, err := collector.Collect()
 		if err != nil {
 			fmt.Fprintf(stderr, "Error collecting memory: %v\n", err)
