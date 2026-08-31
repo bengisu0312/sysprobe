@@ -54,6 +54,23 @@ func TestParseMeminfo(t *testing.T) {
 			wantPercent:   50.0,
 			wantSwapPct:   0.0,
 		},
+		{
+			name: "zero swap total",
+			input: []byte("MemTotal:       1000 kB\n" +
+				"MemAvailable:    500 kB\n" +
+				"SwapTotal:         0 kB\n" +
+				"SwapFree:          0 kB\n"),
+			wantErr:       false,
+			wantTotal:     1024000,
+			wantAvailable: 512000,
+			wantPercent:   50.0,
+			wantSwapPct:   0.0,
+		},
+		{
+			name:    "zero total memory",
+			input:   []byte("MemTotal:          0 kB\nMemAvailable:      0 kB\n"),
+			wantErr: true, // MemTotal 0 ise hesap yapılamaz, hata dönmeli
+		},
 	}
 
 	for _, tt := range tests {
@@ -71,7 +88,6 @@ func TestParseMeminfo(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 
-			// t.Errorf kullanarak tüm alanları aynı anda kontrol ediyoruz
 			if got.Total != tt.wantTotal {
 				t.Errorf("Total = %d, want %d", got.Total, tt.wantTotal)
 			}
@@ -115,7 +131,6 @@ func TestParseMeminfoRealFixture(t *testing.T) {
 }
 
 func TestMemoryUsedPercent(t *testing.T) {
-	// Sıfır Total durumu (sıfıra bölme koruması)
 	mZero := Memory{Total: 0, Available: 0, SwapTotal: 0, SwapFree: 0}
 	if got := mZero.UsedPercent(); got != 0.0 {
 		t.Errorf("UsedPercent() with zero Total = %f, want 0.0", got)
