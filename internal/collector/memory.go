@@ -72,8 +72,8 @@ func parseMeminfo(data []byte) (Memory, error) {
 	}
 
 	total, ok := metrics["MemTotal"]
-	if !ok {
-		return Memory{}, fmt.Errorf("missing required field: MemTotal")
+	if !ok || total == 0 {
+		return Memory{}, fmt.Errorf("missing or invalid field: MemTotal")
 	}
 
 	available, ok := metrics["MemAvailable"]
