@@ -15,4 +15,14 @@ fmt:
 vet:
 	go vet ./...
 
-.PHONY: build run clean fmt vet
+test:
+	go test ./...
+
+test-race:
+	go test -race ./...
+
+coverage:
+	go test -coverprofile=coverage.out ./internal/collector
+	go tool cover -func=coverage.out
+
+.PHONY: build run clean fmt vet test test-race coverage
