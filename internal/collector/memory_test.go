@@ -123,7 +123,7 @@ func TestParseMeminfoRealFixture(t *testing.T) {
 	if m.Available > m.Total {
 		t.Errorf("Available (%d) cannot be greater than Total (%d)", m.Available, m.Total)
 	}
-	
+
 	p := m.UsedPercent()
 	if p < 0 || p > 100 {
 		t.Errorf("UsedPercent() = %f, expected between 0 and 100", p)

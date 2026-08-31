@@ -50,4 +50,3 @@ func TestParseCPUStat(t *testing.T) {
 		t.Errorf("Idle = %v, Beklenen = %v", stat.Idle, expectedIdle)
 	}
 }
-

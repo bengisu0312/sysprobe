@@ -49,6 +49,22 @@ func run(args []string, stdout, stderr io.Writer) int {
 			fmt.Fprintf(stdout, "Swap:     %.1f%% (%.1f GiB / %.1f GiB)\n", mem.SwapUsedPercent(), swapUsedGiB, swapTotalGiB)
 		}
 
+		disk, err := collector.CollectDisk("/")
+		if err != nil {
+			fmt.Fprintf(stderr, "Error collecting disk: %v\n", err)
+			return 1
+		}
+		diskTotalGiB := float64(disk.Total) / (1024 * 1024 * 1024)
+		diskUsedGiB := float64(disk.Used) / (1024 * 1024 * 1024)
+		fmt.Fprintf(stdout, "Disk /:  %.1f%% (%.1f GiB / %.1f GiB)\n", disk.UsedPercent(), diskUsedGiB, diskTotalGiB)
+
+		load, err := collector.CollectLoad()
+		if err != nil {
+			fmt.Fprintf(stderr, "Error collecting load: %v\n", err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "Load:    %.2f / %.2f / %.2f  (%.2f per core, %d cpus)\n", load.Load1, load.Load5, load.Load15, load.PerCore(), load.CPUs)
+
 		return 0
 
 	case "version":
@@ -64,4 +80,4 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 func printUsage(w io.Writer) {
 	fmt.Fprintln(w, "Usage: sysprobe <status|version>")
-}
+
