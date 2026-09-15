@@ -8,6 +8,7 @@ import (
 
 	"github.com/bengisu0312/sysprobe/internal/collector"
 	"github.com/bengisu0312/sysprobe/internal/config"
+	"github.com/bengisu0312/sysprobe/internal/report"
 	"github.com/bengisu0312/sysprobe/internal/rules"
 )
 
@@ -53,11 +54,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 			
 			// Toplananları listeye ekle
 			allMetrics = append(allMetrics, metrics...)
-			
-			for _, m := range metrics {
-				fmt.Fprintf(stdout, "%-20s %8.1f %s\n", m.Name, m.Value, m.Unit)
-			}
-		}
+		} // <-- Döngü burada bitiyor, metrikleri tek tek ekrana basma kısmını sildik!
+
+		// YENİ: İnsan dostu hizalı ve renkli tabloyu stdout'a bas
+		fmt.Fprintln(stdout)
+		report.PrintTable(stdout, allMetrics, cfg)
 
 		// Kural motorunu çalıştır ve son durumu bul
 		overallStatus := rules.Evaluate(allMetrics, cfg)
